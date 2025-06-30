@@ -28,9 +28,9 @@ class HomeFragment : Fragment() {
         }
 
         // Setze Klicklistener für Refresh-Button
-        binding.refreshButton.setOnClickListener {
-            homeViewModel.refreshData()
-        }
+        //binding.refreshButton.setOnClickListener {
+        //    homeViewModel.refreshData()
+        //}
 
         return binding.root
     }
