@@ -12,19 +12,24 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private lateinit var homeViewModel: HomeViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
-        // Observe LiveData and update UI
+        // Beobachte LiveData
         homeViewModel.text.observe(viewLifecycleOwner) { text ->
             binding.textHome.text = text
+        }
+
+        // Setze Klicklistener für Refresh-Button
+        binding.refreshButton.setOnClickListener {
+            homeViewModel.refreshData()
         }
 
         return binding.root
@@ -34,10 +39,4 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    fun refreshData() {
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        homeViewModel.refreshData()
-    }
-
 }
