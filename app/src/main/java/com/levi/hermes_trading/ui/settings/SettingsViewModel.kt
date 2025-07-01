@@ -47,10 +47,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             // or you send an event. For now, we'll let MainActivity handle it on next creation,
             // or if MainActivity is the one observing this ViewModel.
             // OR, if you want direct control and MainActivity is not easily reachable:
-            DataUpdateForegroundService.startService(getApplication())
+            DataUpdateForegroundService.startHermesService(getApplication())
         } else {
             Log.d("SettingsViewModel", "Auto-sync disabled, ensuring service is stopped.")
-            DataUpdateForegroundService.stopService(getApplication())
+            DataUpdateForegroundService.stopHermesService(getApplication())
         }
     }
 }

@@ -2,11 +2,39 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Essential Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Required for Android 13 (API 33+) to show notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+        Required if using foregroundServiceType="dataSync".
+        - Attribute `android:foregroundServiceType` available from Android 10 (API 29).
+        - Permission `FOREGROUND_SERVICE_DATA_SYNC` is a runtime permission from Android 14 (API 34+).
+          If targeting API 34+, this permission needs to be requested at runtime.
+          For lower targets, declaring it is good practice when using the type.
+    -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- For vibration, used by alarm notifications -->
     <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!--
+        Required for scheduling exact alarms (Android 12, API 31+).
+        This is a "Special App Access" permission that users grant via system settings.
+        For older versions, this permission is granted by default if declared.
+        Ensure it's justified by your app's functionality.
+    -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <!-- Recommended: To reschedule alarms after device reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Optional but useful: To check current network state for logging/logic -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <application
         android:allowBackup="true"
@@ -17,20 +45,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HermesTrading"
-        tools:targetApi="31">
+        tools:targetApi="31"> <!-- Consider updating targetApi, e.g., to 33 or 34, if you're testing newer Android features/permissions like runtime FOREGROUND_SERVICE_DATA_SYNC -->
 
-        <!-- Service declaration MOVED inside the application tag -->
         <service
             android:name=".services.DataUpdateForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-        <!--
-            Added enabled, exported, and foregroundServiceType attributes
-            for completeness and best practice.
-            android:foregroundServiceType="dataSync" is required if your
-            app targets Android 14 (API level 34) or higher.
-        -->
 
         <activity
             android:name=".MainActivity"
@@ -42,15 +63,36 @@
             </intent-filter>
         </activity>
 
+        <!-- Receiver for AlarmManager to trigger critical syncs -->
+        <receiver
+            android:name=".receivers.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <!-- exported="false" is appropriate as only the system should send broadcasts to it via PendingIntent -->
+
         <!--
-        The following duplicate intent-filter was REMOVED.
-        The MAIN/LAUNCHER intent filter should be within the
-        declaration of your main launcher Activity (.MainActivity in this case).
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+            Receiver to reschedule alarms on device boot.
+            Ensure you create BootCompletedReceiver.kt in your .receivers package.
         -->
+        <!--<receiver
+            android:name=".receivers.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="true">
+
+                exported="true" is required for this receiver to receive the system broadcast
+                ACTION_BOOT_COMPLETED, especially on newer Android versions (SDK 31+).
+                If you add an intent-filter, it generally needs to be exported.
+
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                    Optional: Some older devices might send QUICKBOOT_POWERON.
+                    You can add it if you want to catch those as well, though
+                    BOOT_COMPLETED is the standard one.
+
+            <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver> -->
 
     </application>
 
