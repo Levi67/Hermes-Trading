@@ -1,68 +1,51 @@
 package com.levi.hermes_trading.ui.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.levi.hermes_trading.JsonPull
-import com.levi.hermes_trading.model.EtfEntry
+import androidx.lifecycle.map // For LiveData transformations
+import com.levi.hermes_trading.data.DataRepository
+import com.levi.hermes_trading.model.EtfEntry // Your EtfEntry model
 import org.json.JSONObject
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(private val dataRepository: DataRepository) : ViewModel() {
 
-    private val _text = MutableLiveData<String>()
-    val text: LiveData<String> = _text
+    // Keep if you need raw string for debugging or other simple display
+    val rawJsonStringData: LiveData<String?> = dataRepository.rawJsonFromSheet
 
-    private val _items = MutableLiveData<List<EtfEntry>>()
-    val items: LiveData<List<EtfEntry>> = _items
+    // The LiveData that will hold the parsed JSONObject from the repository
+    private val sheetJsonObject: LiveData<JSONObject?> = dataRepository.parsedSheetJsonObject
 
-    private val jsonPull = JsonPull()
+    // Transformed LiveData for the RecyclerView
+    val etfEntries: LiveData<List<EtfEntry>> = sheetJsonObject.map { jsonObject ->
+        val entries = mutableListOf<EtfEntry>()
+        jsonObject?.let { obj ->
+            // Iterate over the keys in the main JSON object (e.g., "SPX", "DAX")
+            obj.keys().forEach { key -> // 'key' here is "SPX", "DAX", etc.
+                val innerObject = obj.optJSONObject(key) // Get the inner object for "SPX"
+                if (innerObject != null) {
+                    val value = innerObject.optString("value", "N/A")
+                    val urgency = innerObject.optString("urgency", "Normal")
+                    val color = innerObject.optString("color", "#80808080") // Default to gray
+
+                    // 'key' is used as the 'name' for EtfEntry
+                    entries.add(EtfEntry(name = key, value = value, urgency = urgency, color = color))
+                }
+            }
+        }
+        Log.d("HomeViewModel", "Parsed ${entries.size} ETF entries.")
+        entries // This list becomes the value of etfEntries LiveData
+    }
 
     init {
-        loadData()
+        Log.d("HomeViewModel", "Initialized. DataRepository: $dataRepository")
     }
 
-    fun refreshData() {
-        loadData()
-    }
-
-    private fun loadData() {
-        jsonPull.pullJson { rawJson ->
-            val resultList = mutableListOf<EtfEntry>()
-            val jsonObject = parseJson(rawJson)
-
-            if (jsonObject != null) {
-                val prettyString = buildString {
-                    for (key in jsonObject.keys()) {
-                        val inner = jsonObject.optJSONObject(key)
-                        appendLine(key)
-                        if (inner != null) {
-                            val value = inner.optString("value", "")
-                            val urgency = inner.optString("urgency", "")
-                            val color = inner.optString("color", "#000000")
-                            appendLine("    value = $value")
-                            appendLine("    urgency = $urgency")
-                            appendLine("    color = $color")
-
-                            // Add to list
-                            resultList.add(EtfEntry(key, value, urgency, color))
-                        }
-                        appendLine()
-                    }
-                }
-                _text.postValue(prettyString)
-            } else {
-                _text.postValue("Fehler beim Parsen der Daten.")
-            }
-
-            _items.postValue(resultList)
-        }
-    }
-
-    private fun parseJson(jsonString: String?): JSONObject? {
-        return try {
-            JSONObject(jsonString)
-        } catch (e: Exception) {
-            null
-        }
+    /**
+     * Call this to ask the DataRepository to reload its data.
+     */
+    fun refreshEtfData() {
+        Log.d("HomeViewModel", "refreshEtfData called, telling repository to reload.")
+        dataRepository.reloadDataFromFile() // Or refreshDataFromWorkerCache()
     }
 }

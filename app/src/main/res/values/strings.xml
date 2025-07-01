@@ -5,4 +5,8 @@
     <string name="title_notifications">Notifications</string>
     <string name="refresh">Refresh</string>
     <string name="settings">Settings</string>
+    <string name="setting_enable_auto_minute_sync">Enable Minute-by-Minute Sync</string>
+    <string name="setting_enable_auto_minute_sync_description">Automatically sync data every minute
+        when enabled. Requires notification permission. This may consume more battery.
+    </string>
 </resources>

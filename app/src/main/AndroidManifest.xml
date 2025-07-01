@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:allowBackup="true"
@@ -14,16 +17,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HermesTrading"
         tools:targetApi="31">
+
+        <!-- Service declaration MOVED inside the application tag -->
+        <service
+            android:name=".services.DataUpdateForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+        <!--
+            Added enabled, exported, and foregroundServiceType attributes
+            for completeness and best practice.
+            android:foregroundServiceType="dataSync" is required if your
+            app targets Android 14 (API level 34) or higher.
+        -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+        The following duplicate intent-filter was REMOVED.
+        The MAIN/LAUNCHER intent filter should be within the
+        declaration of your main launcher Activity (.MainActivity in this case).
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        -->
+
     </application>
 
 </manifest>
