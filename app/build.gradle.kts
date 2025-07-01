@@ -52,6 +52,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // or latest version
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

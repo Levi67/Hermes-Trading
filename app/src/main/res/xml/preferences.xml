@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="Synchronization">
+
+        <SwitchPreferenceCompat
+            app:key="pref_auto_minute_sync_enabled"
+            app:title="@string/setting_enable_auto_minute_sync"
+            app:summary="@string/setting_enable_auto_minute_sync_description"
+            app:defaultValue="true" />
+        <!-- Comment moved outside the tag or between attributes -->
+        <!-- Make sure this key is unique -->
+        <!-- Or whatever your default is (this comment referred to defaultValue) -->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Notifications">
+
+        <SwitchPreferenceCompat
+            app:key="pref_key_alarms_enabled"
+            app:title="Enable Trading Alarms"
+            app:summary="Receive notifications for active trading alarms"
+            app:defaultValue="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
