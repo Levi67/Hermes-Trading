@@ -4,4 +4,5 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="refresh">Refresh</string>
+    <string name="settings">Settings</string>
 </resources>
